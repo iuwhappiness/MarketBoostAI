@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { ResultView } from './components/ResultDisplay';
 import { Loader } from './components/Loader';
 import { ProjectsPanel } from './components/ProjectsPanel';
@@ -221,6 +222,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1c2e] via-[#0f111a] to-black text-gray-100 font-sans flex flex-col selection:bg-indigo-500/30">
+      <Analytics />
       <Header />
       <main className="container mx-auto p-4 md:p-8 flex-grow">
         <HeroSection />
