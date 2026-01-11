@@ -39,7 +39,7 @@ const responseSchema = {
     },
     shortDescription: {
         type: Type.STRING,
-        description: "Hook pendek (2-3 kalimat)."
+        description: "Hook pendek (2-3 kalimat) yang sangat persuasif, menggugah emosi, dan diakhiri dengan Micro-CTA yang jelas."
     },
     shortHighlights: {
       type: Type.ARRAY,
@@ -53,7 +53,7 @@ const responseSchema = {
     },
     longDescription: {
       type: Type.STRING,
-      description: "Deskripsi lengkap (minimal 500 kata), mencakup skenario penggunaan, solusi masalah pembeli, integrasi fitur & spesifikasi, serta Hashtags."
+      description: "Deskripsi lengkap (800+ kata), mencakup skenario penggunaan detail, solusi masalah pembeli (pain points), Key Highlights, Fitur Utama, Spesifikasi Teknik mendalam, Call to Action yang dibungkus [CTA]...[/CTA], serta 15+ Hashtags."
     },
     whatsInTheBox: {
       type: Type.STRING,
@@ -137,33 +137,29 @@ const responseSchema = {
 
 function buildPrompt(input: ProductInput): string {
   return `
-**SYSTEM INSTRUCTION: MARKET BOOST INTELLIGENCE v4.5**
+**SYSTEM INSTRUCTION: SMART COMMERCE STUDIO / PRODUCT GENIUS v5.0**
 
 **BAHASA OUTPUT WAJIB: INDONESIA.**
 
-**CORE ENGINE (5 PILLARS OF EXPERTISE):**
-Anda adalah sistem kecerdasan buatan yang mensimulasikan diskusi tim ahli e-commerce kelas dunia. Aktifkan 5 persona ahli berikut secara internal:
-1. **🕵️ Algorithm Strategist**, 2. **👁️ Visibility Architect**, 3. **🚀 Growth & Algorithm Expert**, 4. **📈 Growth Hacker**, 5. **📱 Social Optimizer**.
+**TUGAS OPERASIONAL UTAMA:**
 
----
-**TUGAS OPERASIONAL KHUSUS:**
+1.  **DEEP PRODUCT DESCRIPTION (longDescription):**
+    *   **Struktur Wajib**: Gunakan teknik Copywriting AIDA (Attention, Interest, Desire, Action).
+    *   **Skenario Penggunaan (Use-Cases)**: Jabarkan minimal 3 konteks nyata di mana pembeli akan menggunakan produk ini.
+    *   **Solution for Pain Points**: Identifikasi minimal 3 ketakutan atau masalah utama target market (misal: "Khawatir barang palsu", "Sering rusak dalam sebulan", "Desain yang pasaran") dan tunjukkan bagaimana produk ini adalah solusinya.
+    *   **Input Wajib**: Masukkan section khusus berjudul "KEY HIGHLIGHTS", "FITUR UTAMA", dan "SPESIFIKASI TEKNIK" di tengah narasi deskripsi. Berikan detail teknis yang komprehensif.
+    *   **CTA Visual**: Bagian penutup persuasif WAJIB dibungkus dengan tag [CTA]...[/CTA].
 
-1.  **DESKRIPSI PRODUK PANJANG (Long Description):**
-    *   Wajib sangat detail dan persuasif (AIDA Framework).
-    *   **Skenario Penggunaan:** Berikan contoh situasi nyata di mana produk ini sangat berguna (Use-case scenarios).
-    *   **Pain Points:** Identifikasi masalah yang biasanya dihadapi calon pembeli dan bagaimana produk ini menyelesaikannya secara tuntas.
-    *   **Integrasi Penuh:** Masukkan 'Key Highlights', 'Fitur Utama', dan 'Spesifikasi Teknik' ke dalam narasi deskripsi agar terlihat profesional.
-    *   Gunakan Formatting (Bold, Bullet points) yang menarik.
-    *   Tambahkan 15-20 Hashtags relevan di akhir.
+2.  **SEO KEYWORDS (EXACTLY 30):**
+    *   Hasilkan tepat 30 kata kunci unik yang didistribusikan secara strategis:
+        - 5 Primary (Volume tinggi)
+        - 8 Secondary (Terkait erat)
+        - 10 Long-Tail (Pertanyaan spesifik pembeli)
+        - 7 Backend Tags (Hidden keywords untuk algoritma ${input.platform})
 
-2.  **SEO KEYWORDS (30 KEYWORDS):**
-    *   Hasilkan TOTAL 30 kata kunci unik.
-    *   Distribusi: 5 Primary, 8 Secondary, 10 Long-Tail, 7 Backend Tags.
-    *   Fokus pada volume pencarian tinggi dan relevansi marketplace ${input.platform}.
-
-3.  **JUDUL & VISUAL:**
-    *   Judul optimal SEO dengan formula: [Keyword] + [USP] + [Specs].
-    *   Konsep visual yang "Thumb-stopping".
+3.  **CONVERSION ENGINE**:
+    *   Gunakan gaya bahasa: ${input.copywritingStyle}.
+    *   Pastikan visualisasi konten video dan gambar mendukung narasi penggunaan produk di dunia nyata.
 
 **USER INPUT DATA:**
 - Produk: ${input.productName}
@@ -171,10 +167,9 @@ Anda adalah sistem kecerdasan buatan yang mensimulasikan diskusi tim ahli e-comm
 - Target: ${input.targetMarket}
 - Harga: ${input.estimatedPrice}
 - Platform: ${input.platform}
-- Gaya Bahasa: ${input.copywritingStyle}
 
-**BRIEF SPESIFIK:**
-"${input.additionalBrief || 'Optimasi standar maksimal.'}"
+**BRIEF KHUSUS:**
+"${input.additionalBrief || 'Optimasi maksimal untuk konversi penjualan.'}"
 
 Hasilkan objek JSON sesuai skema. Pastikan total SEO keywords berjumlah tepat 30.
 `;
@@ -218,7 +213,7 @@ export const generateProductContent = async (input: ProductInput): Promise<Gener
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    let friendlyMessage = "Terjadi kesalahan pada Market Boost Engine.";
+    let friendlyMessage = "Terjadi kesalahan pada Product Genius Engine.";
     if (error instanceof Error) {
         const errorMessage = error.message.toLowerCase();
         if (errorMessage.includes('safety')) {
@@ -235,10 +230,10 @@ export const generateImageFromConcept = async (concept: string, baseImage: { dat
     const model = 'gemini-2.5-flash-image';
     const finalConcept = `${concept}. 
     
-    INSTRUKSI VISUAL (SANGAT PENTING):
-    1. PRODUK WAJIB 100% AKURAT: Pertahankan bentuk, warna, desain, dan label produk SAMA PERSIS dengan gambar referensi. Jangan mengubah atau memperbaiki produk sedikitpun.
-    2. GAYA FOTO: User Generated Content (UGC), foto amatir menggunakan HP kelas menengah (non-flagship), pencahayaan natural apa adanya (non-studio).
-    3. SUASANA: Terlihat seperti "Real Pic" testimoni pembeli asli, autentik, tidak diedit filter estetik, tekstur nyata, latar belakang generik (rumah/kantor biasa).`;
+    INSTRUKSI VISUAL STUDIO:
+    1. PRODUK WAJIB 100% AKURAT: Pertahankan bentuk, warna, dan detail label produk SAMA PERSIS dengan gambar referensi.
+    2. GAYA FOTO: Profesional E-commerce Studio, pencahayaan clean, high resolution, 4K quality.
+    3. KONTEKS: Tampilkan produk sedang digunakan (lifestyle) sesuai konsep agar pembeli bisa membayangkan skenario penggunaannya.`;
 
     const textPart = { text: finalConcept };
     const imagePart = {

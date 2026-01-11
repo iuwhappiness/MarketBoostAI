@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react';
 import type { ImageConcepts, DetailedImageConcept, ImageFile } from '../types';
 import { generateImageFromConcept } from '../services/geminiService';
@@ -239,7 +238,7 @@ export const ImageGenerationSection = forwardRef<ImageGenerationSectionHandle, I
                 {concepts.supporting.map((conceptData, i) => (
                     <ConceptGenerator 
                         key={i} 
-                        ref={el => supportingRefs.current[i] = el}
+                        ref={(el) => { supportingRefs.current[i] = el; }}
                         title={`Gambar Pendukung ${i + 1}`} 
                         conceptData={conceptData} 
                         baseImage={baseImage} 
