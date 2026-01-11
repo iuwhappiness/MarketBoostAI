@@ -6,6 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MarketBoost AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            animation: {
+              'spin-slow': 'spin 3s linear infinite',
+              'spin-reverse': 'spin-reverse 1s linear infinite',
+              'fadeUp': 'fadeUp 0.5s ease-out forwards',
+              'gradient-x': 'gradient-x 15s ease infinite',
+              'bounce-slow': 'bounce 3s infinite',
+            },
+            keyframes: {
+              'spin-reverse': {
+                from: { transform: 'rotate(360deg)' },
+                to: { transform: 'rotate(0deg)' },
+              },
+              fadeUp: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              'gradient-x': {
+                '0%, 100%': {
+                    'background-size': '200% 200%',
+                    'background-position': 'left center'
+                },
+                '50%': {
+                    'background-size': '200% 200%',
+                    'background-position': 'right center'
+                },
+              },
+            }
+          }
+        }
+      }
+    </script>
     <style>
       /* Custom scrollbar for better aesthetics */
       ::-webkit-scrollbar {
@@ -23,17 +58,17 @@
         background-color: #718096; /* dark-500 */
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "uuid": "https://esm.sh/uuid@^13.0.0",
-    "jszip": "https://esm.sh/jszip@^3.10.1",
     "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "uuid": "https://esm.sh/uuid@^13.0.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "jszip": "https://esm.sh/jszip@^3.10.1",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>

@@ -1,9 +1,11 @@
+
 import React, { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react';
 import type { ImageConcepts, DetailedImageConcept, ImageFile } from '../types';
-import { generateImageFromConcept } from '../services/geminiService';
+import { generateImageFromConcept, generateImageVariation } from '../services/geminiService';
 import { CameraIcon } from './icons/CameraIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { ImageIcon } from './icons/ImageIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
 
 interface ImageGenerationSectionProps {
     concepts: ImageConcepts;
@@ -60,6 +62,23 @@ const ConceptGenerator = forwardRef<ConceptGeneratorHandle, { title: string; con
             setImageState({ status: 'error', data: null, error: errorMessage });
         }
     }, [conceptData.prompt, baseImage]);
+
+    const handleVariation = async () => {
+        if (!imageState.data) return;
+        
+        // Store previous data in case of error? For now, we go to loading state.
+        setImageState(prev => ({ ...prev, status: 'loading', error: null }));
+        
+        try {
+            const newData = await generateImageVariation(conceptData.prompt, imageState.data);
+            setImageState({ status: 'success', data: newData, error: null });
+        } catch (err) {
+             const errorMessage = err instanceof Error ? err.message : "Gagal membuat variasi";
+             // Revert to error state but keep data? 
+             // Simplest approach: show error, user can try regenerate original or variation again if logic allows
+             setImageState(prev => ({ status: 'error', data: prev.data, error: errorMessage }));
+        }
+    };
 
     useEffect(() => {
         if (autoGenerate) {
@@ -118,24 +137,35 @@ const ConceptGenerator = forwardRef<ConceptGeneratorHandle, { title: string; con
                             {imageState.status === 'success' && "Gambar berhasil dibuat."}
                             {imageState.status === 'error' && "Gagal membuat gambar."}
                         </div>
-                         <div className="flex items-center gap-2 w-full sm:w-auto">
+                         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                             <button
                                 onClick={handleGenerate}
                                 disabled={imageState.status === 'loading' || !baseImage}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-500 transition-all shadow-lg shadow-indigo-900/20"
-                                title={!baseImage ? "Unggah gambar produk utama terlebih dahulu" : ""}
+                                className="flex-grow sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-500 transition-all shadow-lg shadow-indigo-900/20"
+                                title={!baseImage ? "Unggah gambar produk utama terlebih dahulu" : "Generate Ulang dari Awal"}
                             >
                                 <CameraIcon className="w-4 h-4" />
                                 {imageState.status === 'loading' ? 'Memproses...' : (imageState.status === 'success' ? 'Buat Ulang' : 'Buat Gambar')}
                             </button>
+                            
                             {imageState.status === 'success' && imageState.data && (
-                                <button
-                                    onClick={handleDownload}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gray-700 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-all border border-gray-600"
-                                >
-                                    <DownloadIcon className="w-4 h-4" />
-                                    <span>Unduh</span>
-                                </button>
+                                <>
+                                    <button
+                                        onClick={handleVariation}
+                                        className="flex-grow sm:flex-none flex items-center justify-center gap-2 bg-purple-600/80 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-purple-600 transition-all shadow-lg shadow-purple-900/20 border border-purple-500/50"
+                                        title="Buat variasi dari gambar ini"
+                                    >
+                                        <SparklesIcon className="w-4 h-4" />
+                                        <span>Variasi</span>
+                                    </button>
+                                    <button
+                                        onClick={handleDownload}
+                                        className="flex-grow sm:flex-none flex items-center justify-center gap-2 bg-gray-700 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-all border border-gray-600"
+                                    >
+                                        <DownloadIcon className="w-4 h-4" />
+                                        <span>Unduh</span>
+                                    </button>
+                                </>
                             )}
                         </div>
                      </div>
@@ -143,28 +173,28 @@ const ConceptGenerator = forwardRef<ConceptGeneratorHandle, { title: string; con
                     {/* Image Preview Area */}
                     <div className="relative w-full min-h-[200px] bg-gray-950/50 rounded-lg border border-gray-800 flex items-center justify-center overflow-hidden">
                         {imageState.status === 'loading' && (
-                            <div className="flex flex-col items-center text-gray-500 animate-pulse">
+                            <div className="flex flex-col items-center text-gray-500 animate-pulse z-10">
                                 <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                                 <p className="text-xs">AI sedang melukis ulang produk Anda...</p>
                             </div>
                         )}
                         
                         {imageState.status === 'error' && (
-                            <div className="text-center text-red-400 p-4">
+                            <div className="text-center text-red-400 p-4 z-10">
                                 <p className="font-semibold text-sm mb-1">Gagal Membuat Gambar</p>
                                 <p className="text-xs opacity-80">{imageState.error}</p>
                             </div>
                         )}
 
-                        {imageState.status === 'success' && imageState.data && (
+                        {imageState.data && (
                             <img
                                 src={`data:image/png;base64,${imageState.data}`}
                                 alt={`Generated image for: ${title}`}
-                                className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
+                                className={`w-full h-auto object-cover transition-all duration-500 ${imageState.status === 'loading' ? 'opacity-30 blur-sm' : 'opacity-100 hover:scale-105'}`}
                             />
                         )}
 
-                        {imageState.status === 'idle' && (
+                        {imageState.status === 'idle' && !imageState.data && (
                             <div className="flex flex-col items-center text-gray-700">
                                 <ImageIcon className="w-12 h-12 mb-2 opacity-20" />
                                 <p className="text-xs">Klik "Buat Gambar" untuk melihat hasil</p>

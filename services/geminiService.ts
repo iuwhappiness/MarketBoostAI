@@ -274,3 +274,40 @@ export const generateImageFromConcept = async (concept: string, baseImage: { dat
     }
     throw new Error("Gagal membuat gambar.");
 };
+
+export const generateImageVariation = async (concept: string, base64Image: string): Promise<string> => {
+    const model = 'gemini-2.5-flash-image';
+    const variationPrompt = `Create a slight variation of the provided image based on this concept: "${concept}".
+    
+    INSTRUCTIONS:
+    1. Keep the main product subject 100% consistent (same shape, label, colors).
+    2. Alter the angle, lighting, or background composition slightly to offer a fresh, creative perspective.
+    3. Maintain high-quality professional studio photography style (4K).`;
+
+    const textPart = { text: variationPrompt };
+    const imagePart = {
+        inlineData: {
+            mimeType: "image/png", // Assuming the output from previous gen is PNG
+            data: base64Image,
+        },
+    };
+
+    try {
+        const response = await ai.models.generateContent({
+            model: model,
+            contents: {
+                parts: [imagePart, textPart]
+            },
+        });
+
+        const part = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (part && part.inlineData) {
+            return part.inlineData.data;
+        }
+        throw new Error("Tidak ada data gambar variasi.");
+
+    } catch (error) {
+        console.error("Error generating variation:", error);
+        throw new Error("Gagal membuat variasi gambar.");
+    }
+};
